@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
-# Upstream UniXNU at the pinned ref (82b847c) ships patch files whose "new file"
-# hunks lack the "new file mode" line, which makes `git apply` abort packaging
-# (e.g. patches/mesa/turnip-frame-diagnostics.patch). Insert the missing header.
-# Idempotent: patches that already carry it are left untouched.
+# CI pre-flight fixes for a clean fork of UniXNU-sheng.
+# 1. Upstream UniXNU at the pinned ref ships *.patch files whose "new file"
+#    hunks lack the "new file mode" line, so `git apply` aborts packaging.
+# 2. board.toml enables the Wi-Fi userspace build; its WCN7850 supplicant
+#    sources are not in this repository, so it always fails. The key is a bare
+#    TOML key, so comment it out before unixnu reads the board.
 set -euo pipefail
 
 python3 - <<'PY'
@@ -29,3 +31,9 @@ print('ci-repair-patches: repaired', len(fixed), 'patch files')
 for name in fixed:
     print('  ', name)
 PY
+
+if [ -f board.toml ]; then
+  perl -pi -e 's|^wifi_tool|# wifi_tool|' board.toml || true
+  echo '--- board.toml wifi keys after repair ---'
+  grep -n 'wifi_tool' board.toml || true
+fi
