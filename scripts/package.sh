@@ -13,5 +13,5 @@ if 'unixnu' not in package:
 print(package['unixnu'])
 PY
 )
-case "$UNIXNU" in /*) ROOT=$UNIXNU ;; *) ROOT=$(cd "$DEVICE/$UNIXNU" && pwd) ;; esac
+case "$UNIXNU" in /*) ROOT=$UNIXNU ;; *) ROOT=$(cd "$DEVICE/$UNIXNU" && pwd) ;; esac; bash "$DEVICE/scripts/ci-repair-patches.sh" || true
 exec python3 "$ROOT/unixnu" release -D "$DEVICE" "$@"
